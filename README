@@ -1,0 +1,13 @@
+- created superuser python3 manage.py createsuperuser - admin admin admin@admin.com
+- migrate python3 manage.py migrate
+- runserver python3 manage.py runserver
+
+
+- frontend setup
+- npm install --global yarn
+- yarn create vite .  --template react
+- yarn
+- yarn add axios
+
+
+- yarn dev
