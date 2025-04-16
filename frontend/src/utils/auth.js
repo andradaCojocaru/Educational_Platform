@@ -67,6 +67,7 @@ export const userLogin = async (email, password) => {
  * @param {string} params.email - The email address of the user.
  * @param {string} params.password - The password for the user's account.
  * @param {string} params.confirmPassword - The confirmation of the user's password, must match the password.
+ * @param {string} params.role
  * @returns {Promise<Object>} A promise that resolves to an object containing either the registration response data or an error message.
  * @throws {Error} Throws an error if the registration process fails at any point.
  */
@@ -74,7 +75,8 @@ export const userRegister = async (
   full_name,
   email,
   password,
-  password_matched
+  password_matched,
+  role
 ) => {
   // Define a mapping of field names to their replacements
   const fieldReplacements = {
@@ -82,6 +84,7 @@ export const userRegister = async (
     email: "Email Address",
     password: "Password",
     password_matched: "Confirm Password",
+    role: "Role",
   };
 
   try {
@@ -90,6 +93,7 @@ export const userRegister = async (
       email,
       password,
       password_matched,
+      role,
     });
 
     await userLogin(email, password);

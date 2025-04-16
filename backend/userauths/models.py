@@ -3,23 +3,29 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 
 class User(AbstractUser):
+    ROLE_CHOICES = [
+        ('student', 'Student'),
+        ('teacher', 'Teacher'),
+    ]
+
     username = models.CharField(unique=True, max_length=100)
     email = models.EmailField(unique=True)
     full_name = models.CharField(unique=True, max_length=100)
     otp = models.CharField(max_length=100, null=True, blank=True)
     refresh_token = models.CharField(max_length=1000, null=True, blank=True)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')  # New field
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
-        return self.email
+        return f"{self.email} ({self.role})"
     
     def save(self, *args, **kwargs):
         email_username, full_name = self.email.split("@")
-        if self.full_name == "" or self.full_name == None:
-            self.full_name == email_username
-        if self.username == "" or self.username == None:
+        if self.full_name == "" or self.full_name is None:
+            self.full_name = email_username
+        if self.username == "" or self.username is None:
             self.username = email_username
         super(User, self).save(*args, **kwargs)
 
@@ -31,6 +37,7 @@ class Profile(models.Model):
     country = models.CharField(max_length=100, null=True, blank=True)
     about = models.TextField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(max_length=10, choices=User.ROLE_CHOICES, default='student')  # New field
 
     def __str__(self):
         if self.full_name:

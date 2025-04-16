@@ -12,6 +12,7 @@ function Register() {
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [userPasswordMatched, setUserPasswordMatched] = useState("");
+  const [userRole, setUserRole] = useState("student"); // Default role is 'student'
   const [isLoadingState, setIsLoadingState] = useState(false);
 
   const navigate = useNavigate();
@@ -24,7 +25,8 @@ function Register() {
       userFullName,
       userEmail,
       userPassword,
-      userPasswordMatched
+      userPasswordMatched,
+      userRole // Pass the selected role
     );
     if (error) {
       Toast().fire({
@@ -44,7 +46,6 @@ function Register() {
 
   return (
     <>
-      {/* Ensure BaseHeader is wrapped in a valid context provider */}
       <BaseHeader />
 
       <section
@@ -70,9 +71,9 @@ function Register() {
                   noValidate=""
                   onSubmit={handleRegister}
                 >
-                  {/* Username */}
+                  {/* Full Name */}
                   <div className="mb-3">
-                    <label htmlFor="email" className="form-label">
+                    <label htmlFor="full_name" className="form-label">
                       Full Name
                     </label>
                     <input
@@ -85,6 +86,8 @@ function Register() {
                       onChange={(e) => setUserFullName(e.target.value)}
                     />
                   </div>
+
+                  {/* Email Address */}
                   <div className="mb-3">
                     <label htmlFor="email" className="form-label">
                       Email Address
@@ -115,20 +118,40 @@ function Register() {
                       onChange={(e) => setUserPassword(e.target.value)}
                     />
                   </div>
+
+                  {/* Confirm Password */}
                   <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
+                    <label htmlFor="passwordMatched" className="form-label">
                       Confirm Password
                     </label>
                     <input
                       type="password"
                       id="passwordMatched"
                       className="form-control"
-                      name="password"
+                      name="passwordMatched"
                       placeholder="**************"
                       required=""
                       onChange={(e) => setUserPasswordMatched(e.target.value)}
                     />
                   </div>
+
+                  {/* Role Selection */}
+                  <div className="mb-3">
+                    <label htmlFor="role" className="form-label">
+                      Select Role
+                    </label>
+                    <select
+                      id="role"
+                      className="form-control"
+                      value={userRole}
+                      onChange={(e) => setUserRole(e.target.value)}
+                    >
+                      <option value="student">Student</option>
+                      <option value="teacher">Teacher</option>
+                    </select>
+                  </div>
+
+                  {/* Submit Button */}
                   <div>
                     <div className="d-grid">
                       {isLoadingState === true && (
