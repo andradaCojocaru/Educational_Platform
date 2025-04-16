@@ -27,31 +27,6 @@ function BaseHeader() {
                         <span className="navbar-toggler-icon" />
                     </button>
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/pages/contact-us/">
-                                    {" "}
-                                    <i className="fas fa-phone"></i> Contact Us
-                                </Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/pages/about-us/">
-                                    <i className="fas fa-address-card"></i> About Us
-                                </Link>
-                            </li>
-                            <li className="nav-item dropdown">
-                                <a
-                                    className="nav-link dropdown-toggle"
-                                    href="#"
-                                    role="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                >
-                                    <i className="fas fa-graduation-cap"></i> Student
-                                </a>
-                                
-                            </li>
-                        </ul>
                         {isLoggedIn() === true ? (
                             <>
                                 <Link to="/logout/" className="btn btn-primary ms-2" type="submit">

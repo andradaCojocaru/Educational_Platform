@@ -81,7 +81,6 @@ function Register() {
                       id="full_name"
                       className="form-control"
                       name="full_name"
-                      placeholder="John Doe"
                       required=""
                       onChange={(e) => setUserFullName(e.target.value)}
                     />
@@ -97,7 +96,6 @@ function Register() {
                       id="email"
                       className="form-control"
                       name="email"
-                      placeholder="johndoe@gmail.com"
                       required=""
                       onChange={(e) => setUserEmail(e.target.value)}
                     />

@@ -109,9 +109,6 @@ function Login() {
                         You must agree before submitting.
                       </div>
                     </div>
-                    <div>
-                      <Link to="/forgot-password/">Forgot your password?</Link>
-                    </div>
                   </div>
                   <div>
                     <div className="d-grid">
