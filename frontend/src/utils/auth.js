@@ -151,8 +151,10 @@ export const setUser = async () => {
   }
 
   if (isAccessTokenExpired(access_token)) {
-    const response = getRefreshedToken(refresh_token);
-    setAuthUser(response.access, response.refresh);
+    // const response = getRefreshedToken(refresh_token);
+    // setAuthUser(response.access, response.refresh);
+    const { access, refresh } = await getRefreshedToken(refresh_token);
+    setAuthUser(access, refresh);
   } else {
     setAuthUser(access_token, refresh_token);
   }
@@ -164,16 +166,21 @@ export const setUser = async () => {
  * Otherwise, it sets the user with the existing tokens.
  */
 export const setAuthUser = async (access_token, refresh_token) => {
-  Cookie.set("access_token", access_token, {
-    expires: 1,
-    secure: true,
-  });
+  // Cookie.set("access_token", access_token, {
+  //   expires: 1,
+  //   secure: true,
+  // });
 
-  Cookie.set("refresh_token", refresh_token, {
-    expires: 7,
-    secure: true,
-  });
-
+  // Cookie.set("refresh_token", refresh_token, {
+  //   expires: 7,
+  //   secure: true,
+  // });
+  // secure: true only when served over https in production
+  const cookieOpts =
+    import.meta.env.PROD ? { secure: true, sameSite: "strict" } : { sameSite: "strict" };
+  
+  Cookie.set("access_token", access_token, { expires: 1, ...cookieOpts });
+  Cookie.set("refresh_token", refresh_token, { expires: 7, ...cookieOpts });
   const user = jwt_decode(access_token) ?? null;
 
   if (user) {
@@ -189,9 +196,10 @@ export const setAuthUser = async (access_token, refresh_token) => {
  */
 export const getRefreshedToken = async () => {
   const refresh_token = Cookie.get("refresh_token");
-  const response = await axios.post(`user/token/refresh/`, {
-    refresh: refresh_token,
-  });
+  const response = await axios.post(`user/token/refresh/`, { refresh: refresh_token });
+  // const response = await axios.post(`user/token/refresh/`, {
+  //   refresh: refresh_token,
+  // });
   return response.data;
 };
 
@@ -208,4 +216,10 @@ export const isAccessTokenExpired = (access_token) => {
   } catch (error) {
     return true;
   }
+};
+export const bootstrapAuth = async () => {
+  const { setLoadingState } = useAuthStore.getState();
+  setLoadingState(true);              // show <p>Loading…</p> once
+  await setUser();                    // the function you already wrote
+  setLoadingState(false);
 };

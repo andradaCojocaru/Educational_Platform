@@ -31,6 +31,7 @@
     "react-player": "^2.14.1",
     "react-rater": "^6.0.5",
     "react-router-dom": "6.10.0",
+    "recharts": "^2.15.3",
     "sweetalert2": "^11.7.32",
     "yet-another-react-lightbox": "^3.14.0",
     "zustand": "^4.4.4"

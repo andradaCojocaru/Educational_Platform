@@ -25,7 +25,7 @@ function Login() {
         text: error,
       });
     } else {
-      navigate("/");
+      navigate("/all-courses/", { replace: true });
       setIsLoadingState(false);
     }
   };

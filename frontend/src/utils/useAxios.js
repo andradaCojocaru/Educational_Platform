@@ -9,28 +9,29 @@ import { getRefreshedToken, isAccessTokenExpired, setAuthUser } from "./auth";
  * @returns {AxiosInstance} The configured Axios instance.
  */
 const useAxios = () => {
-  const accessToken = Cookies.get("access_token");
-  const refreshToken = Cookies.get("refresh_token");
+  const instance = axios.create({ baseURL: API_BASE_URL });
 
-  const axiosInstance = axios.create({
-    baseURL: API_BASE_URL,
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  instance.interceptors.request.use(async (config) => {
+    let access = Cookies.get("access_token");
+    const refresh = Cookies.get("refresh_token");
 
-  axiosInstance.interceptors.request.use(async (req) => {
-    if (!isAccessTokenExpired) {
-      return req;
+    // nothing at all?  just send the request unauthenticated
+    if (!access) return config;
+
+    // refresh if expired
+    if (isAccessTokenExpired(access) && refresh) {
+      const { access: newAccess, refresh: newRefresh } =
+        await getRefreshedToken(refresh);
+
+      setAuthUser(newAccess, newRefresh);        // stores new cookies + Zustand
+      access = newAccess;
     }
 
-    const response = await getRefreshedToken(refreshToken);
-
-    setAuthUser(response.access, response.refresh);
-    req.headers.Authorization = `Bearer ${response.data?.access}`;
-
-    return req;
+    config.headers.Authorization = `Bearer ${access}`;
+    return config;
   });
 
-  return axiosInstance;
+  return instance;
 };
 
 export default useAxios;
