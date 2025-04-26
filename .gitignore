@@ -1,0 +1,76 @@
+###############################################################################
+# Top-level .gitignore for a Django + React (Vite) monorepo
+# Keep comments ⬇️ if they help your team; delete them if you prefer silence.
+###############################################################################
+
+############################
+# 1. General OS / editor junk
+############################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+._*
+*.swp
+*.swo
+.idea/
+.vscode/
+
+############################
+# 2. Python / Django
+############################
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual-envs (root or nested)
+venv/
+.venv/
+*/venv/
+
+# Django runtime / dev artifacts
+*.sqlite3
+*.sqlite3-journal
+*.log
+local_settings.py
+.env
+.env.*                  # .env.dev, .env.local, etc.
+
+# Test & coverage caches
+.pytest_cache/
+.coverage*
+htmlcov/
+.cache/
+
+# Build/distribution
+build/
+dist/
+*.egg-info/
+*.egg
+wheelhouse/
+
+############################
+# 3. Node / React (Vite)
+############################
+node_modules/
+frontend/node_modules/
+
+# Vite/Cra build output
+frontend/dist/
+dist/
+
+# Package-manager noise
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+############################
+# 4. Optional: media & static
+############################
+# If you collect static to a local folder or store uploads in-repo during dev,
+# ignore them. Remove these lines if you commit production assets.
+media/
+staticfiles/
+staticfiles_build/

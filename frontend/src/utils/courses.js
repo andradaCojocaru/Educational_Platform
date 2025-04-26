@@ -1,0 +1,39 @@
+import apiInstance from "./axios";
+
+/**
+ * Fetch all courses.
+ * @returns {Promise}
+ */
+export const getCourses = () => {
+  return apiInstance.get("courses/");
+};
+
+/**
+ * Create a new course.
+ * @param {Object} courseData
+ * @param {string} courseData.title
+ * @param {string} courseData.description
+ * @returns {Promise}
+ */
+export const createCourse = (courseData) => {
+  return apiInstance.post("courses/", courseData);
+};
+
+/**
+ * Update an existing course.
+ * @param {number} courseId
+ * @param {Object} courseData
+ * @returns {Promise}
+ */
+export const updateCourse = (courseId, courseData) => {
+  return apiInstance.put(`/courses/${courseId}/`, courseData);
+};
+
+/**
+ * Delete a course.
+ * @param {number} courseId
+ * @returns {Promise}
+ */
+export const deleteCourse = (courseId) => {
+  return apiInstance.delete(`/courses/${courseId}/`);
+};

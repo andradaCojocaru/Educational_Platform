@@ -4,6 +4,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from api import models as api_models
 from userauths.models import Profile, User
+from core.models import Course  # <-- NEW import
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
@@ -25,6 +27,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["username"] = user.username
 
         return token
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
@@ -73,7 +76,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializes User model data.
@@ -99,4 +101,16 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = "__all__"
 
+# ------------------------------
+# ✨ NEW: Course Serializer
+# ------------------------------
 
+
+class CourseSerializer(serializers.ModelSerializer):
+    """
+    Serializes Course model data.
+    """
+
+    class Meta:
+        model = Course
+        fields = "__all__"

@@ -26,7 +26,8 @@ export const userLogin = async (email, password) => {
     });
 
     if (status === 200) {
-      setAuthUser(data.access, data.refresh);
+      localStorage.setItem("accessToken", data.access);
+      localStorage.setItem("refreshToken", data.refresh); // keep if you need
       return { response: data, error: null };
     }
   } catch (error) {
@@ -166,12 +167,10 @@ export const setUser = async () => {
 export const setAuthUser = async (access_token, refresh_token) => {
   Cookie.set("access_token", access_token, {
     expires: 1,
-    secure: true,
   });
 
   Cookie.set("refresh_token", refresh_token, {
     expires: 7,
-    secure: true,
   });
 
   const user = jwt_decode(access_token) ?? null;

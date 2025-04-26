@@ -17,7 +17,9 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoadingState(true);
-    const { error } = await userLogin(userEmail, userPassword);
+
+    const { response, error } = await userLogin(userEmail, userPassword);
+
     if (error) {
       setIsLoadingState(false);
       Toast().fire({
@@ -25,7 +27,7 @@ function Login() {
         text: error,
       });
     } else {
-      navigate("/");
+      navigate("/"); // <--- That's it! No manual token handling needed
       setIsLoadingState(false);
     }
   };
