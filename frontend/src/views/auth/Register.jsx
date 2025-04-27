@@ -35,7 +35,7 @@ function Register() {
       });
       setIsLoadingState(false);
     } else {
-      navigate("/");
+      navigate("/login");
       Toast().fire({
         icon: "success",
         title: "Registration Successful, you have now been logged in",

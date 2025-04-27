@@ -10,7 +10,7 @@ import Logout from "./views/auth/Logout";
 import ForgotPassword from "./views/auth/ForgotPassword";
 import CreateNewPassword from "./views/auth/CreateNewPassword";
 
-import Courses from "./views/courses/Courses"; // <-- ✨ NEW import
+import Courses from "./views/courses/Courses";
 
 /**
  * The top-level component that sets up the application context and routing.
@@ -25,13 +25,12 @@ function App() {
       <MainWrapper>
         <Routes>
           {/* Auth Routes */}
+
           <Route path="/register/" element={<Register />} />
           <Route path="/login/" element={<Login />} />
           <Route path="/logout/" element={<Logout />} />
           <Route path="/forgot-password/" element={<ForgotPassword />} />
           <Route path="/create-new-password/" element={<CreateNewPassword />} />
-
-          {/* ✨ New Courses Route */}
           <Route path="/courses/" element={<Courses />} />
         </Routes>
       </MainWrapper>

@@ -57,3 +57,5 @@ export const unenrollStudent = (courseId, studentEmail) =>
   apiInstance.post(`courses/${courseId}/unenroll/`, {
     student_email: studentEmail,
   });
+
+  export const getTeachers = () => apiInstance.get("teachers/");

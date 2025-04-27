@@ -1,15 +1,16 @@
-// src/pages/Courses.jsx
-
 import React, { useState, useEffect } from "react";
-import { getCourses, createCourse, enrollStudent, deleteCourse, unenrollStudent } from "../../utils/courses";
+import CourseStatsChart from "../../../components/CourseStatsChart";
+
+import { getCourses, getTeachers, createCourse, enrollStudent, deleteCourse, unenrollStudent } from "../../utils/courses";
 import { useAuthStore } from "../../store/auth";
 
 const Courses = () => {
-  const { user, loadingState } = useAuthStore(); // assuming you have this
+  const { user, loadingState } = useAuthStore();
   const [courses, setCourses] = useState([]);
-  const [formData, setFormData] = useState({ title: "", description: "" });
+  const [teachers, setTeachers] = useState([]);
+  const [formData, setFormData] = useState({ title: "", description: "", teacher_id: "" });
   const [enrollData, setEnrollData] = useState({});
-  const [showStudents, setShowStudents] = useState({}); // show/hide students per course
+  const [showStudents, setShowStudents] = useState({});
 
   const fetchCourses = async (currentUser) => {
     try {
@@ -92,7 +93,7 @@ const Courses = () => {
     e.preventDefault();
     try {
       await createCourse(formData);
-      setFormData({ title: "", description: "" });
+      setFormData({ title: "", description: "", teacher_id: "" });
       fetchCourses(user);
     } catch (error) {
       console.error("Error creating course:", error);
@@ -103,16 +104,19 @@ const Courses = () => {
   useEffect(() => {
     if (!loadingState && user) {
       fetchCourses(user);
+      getTeachers().then((res) => setTeachers(res.data));
     }
   }, [loadingState, user]);
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Courses</h1>
-
+      {user?.role === "teacher" && courses.length > 0 && (
+        <CourseStatsChart courses={courses} />
+      )}
       {/* Form for teachers to create a course */}
       {user?.role === "teacher" && (
-        <form onSubmit={handleSubmit} style={{ marginBottom: "2rem" }}>
+        <form onSubmit={handleSubmit} style={{ marginBottom: "2rem"}}>
           <div>
             <input
               type="text"
@@ -123,6 +127,23 @@ const Courses = () => {
               required
               style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%" }}
             />
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
+            <label>Select Teacher:&nbsp;</label>
+            <select
+              name="teacher_id"
+              value={formData.teacher_id}
+              onChange={handleChange}
+              required
+              style={{ padding: "0.4rem" }}
+            >
+              <option value="" disabled>Choose…</option>
+              {teachers.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.full_name} ({t.email})
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <textarea
@@ -160,8 +181,11 @@ const Courses = () => {
             }}
           >
             <h3>{course.title}</h3>
+            <p>
+              <strong>Teacher:</strong>{" "}
+              {course.teacher ? course.teacher.full_name : "—"}
+            </p>
             <p>{course.description}</p>
-            <small>Created at: {new Date(course.created_at).toLocaleString()}</small>
 
             {/* Teacher actions */}
             {user?.role === "teacher" && (
@@ -175,31 +199,13 @@ const Courses = () => {
                     onChange={(e) =>
                       handleEnrollChange(course.id, e.target.value)
                     }
-                    style={{ marginRight: "0.5rem", padding: "0.25rem" }}
+                    style={{ marginBottom: "0.5rem", marginRight: "0.5rem", padding: "0.25rem" }}
                   />
                   <button
                     onClick={() => handleEnroll(course.id)}
                     style={{ padding: "0.25rem 0.5rem" }}
                   >
                     Enroll Student
-                  </button>
-                </div>
-
-                {/* Delete course */}
-                <div style={{ marginTop: "1rem" }}>
-                  <button
-                    onClick={() => handleDeleteCourse(course.id)}
-                    style={{
-                      padding: "0.5rem",
-                      backgroundColor: "red",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      marginTop: "0.5rem",
-                    }}
-                  >
-                    Delete Course
                   </button>
                 </div>
               </>
@@ -216,23 +222,26 @@ const Courses = () => {
 
               {/* Students list */}
               {showStudents[course.id] && (
-                <ul style={{ marginTop: "0.5rem" }}>
+                <ul style={{ marginTop: "0.5rem", paddingLeft: 0, listStyle: "none" }}>
                   {course.students.length > 0 ? (
                     course.students.map((email, idx) => (
                       <li
                         key={idx}
                         style={{
                           display: "flex",
-                          justifyContent: "space-between",
                           alignItems: "center",
+                          gap: "0.5rem",
+                          flexWrap: "wrap",
+                          wordBreak: "break-word"
                         }}
                       >
-                        {email}
+                        <span style={{ flex: "1 1 auto" }}>{email}</span>
                         {user?.role === "teacher" && (
                           <button
                             onClick={() => handleUnenroll(course.id, email)}
                             style={{
                               marginLeft: "1rem",
+                              marginBottom: "0.35rem",
                               padding: "0.25rem",
                               backgroundColor: "orange",
                               color: "white",
@@ -251,6 +260,23 @@ const Courses = () => {
                   )}
                 </ul>
               )}
+
+                {/* Delete course */}
+                <div style={{ marginTop: "1rem" }}>
+                  <button
+                    onClick={() => handleDeleteCourse(course.id)}
+                    style={{
+                      padding: "0.5rem",
+                      backgroundColor: "red",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Delete Course
+                  </button>
+                </div>
             </div>
           </div>
         ))}
