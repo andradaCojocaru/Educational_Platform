@@ -157,11 +157,16 @@ export const setUser = async () => {
   }
 
   if (isAccessTokenExpired(access_token)) {
-    const response = getRefreshedToken(refresh_token);
-    setAuthUser(response.access, response.refresh);
-  } else {
-    setAuthUser(access_token, refresh_token);
-  }
+      try {
+        const { access, refresh } = await getRefreshedToken(refresh_token);
+        await setAuthUser(access, refresh);
+      } catch (err) {
+        logout();
+        return;
+      }
+    } else {
+      await setAuthUser(access_token, refresh_token);
+    }
 };
 
 /**
@@ -180,7 +185,13 @@ export const setAuthUser = async (access_token, refresh_token) => {
   localStorage.setItem("accessToken", access_token);
   localStorage.setItem("refreshToken", refresh_token);
 
-  const user = jwt_decode(access_token) ?? null;
+  let user = null;
+  try {
+    user = jwt_decode(access_token);
+  } catch (e) {
+    logout();
+    return;
+  }
 
   if (user) {
     useAuthStore.getState().setUser(user);
@@ -193,13 +204,21 @@ export const setAuthUser = async (access_token, refresh_token) => {
  *
  * @returns {Promise<{ access: string, refresh: string }>} - The refreshed tokens.
  */
-export const getRefreshedToken = async () => {
-  const refresh_token = Cookie.get("refresh_token");
-  const response = await axios.post(`user/token/refresh/`, {
-    refresh: refresh_token,
+export const getRefreshedToken = async (refresh_token_arg) => {
+  const refresh_token =
+  refresh_token_arg ||
+  Cookie.get("refresh_token") ||
+  localStorage.getItem("refreshToken");
+  
+  if (!refresh_token) {
+    throw new Error("No refresh token available");
+  }
+  
+  const { data } = await axios.post(`user/token/refresh/`, {
+  refresh: refresh_token,
   });
-  return response.data;
-};
+  return data;
+  };
 
 /**
  * Checks if the provided access token is expired.
