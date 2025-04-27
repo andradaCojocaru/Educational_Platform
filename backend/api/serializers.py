@@ -4,7 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from api import models as api_models
 from userauths.models import Profile, User
-from core.models import Course  # <-- NEW import
+from core.models import Course
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -25,7 +25,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["full_name"] = user.full_name
         token["email"] = user.email
         token["username"] = user.username
-        token["role"] = user.role   # <-- ✨ ADD THIS LINE
+        token["role"] = user.role
 
         return token
 
@@ -102,27 +102,37 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = "__all__"
 
-# ------------------------------
-# ✨ NEW: Course Serializer
-# ------------------------------
-
+class TeacherMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = User
+        fields = ("id", "full_name", "email") 
 
 class CourseSerializer(serializers.ModelSerializer):
     """
-    Serializes Course model data.
+    Full course representation.
+    * `teacher`   → read-only nested object
+    * `teacher_id`→ write-only FK you post from the client
+    * `students`  → list of student emails (read-only)
     """
+    teacher     = TeacherMiniSerializer(read_only=True)
+    teacher_id  = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role="teacher"),
+        source="teacher",
+        write_only=True,
+        required=True,
+    )
     students = serializers.SlugRelatedField(
-        many=True,
-        read_only=True,
-        slug_field='email'
+        many=True, read_only=True, slug_field="email"
     )
 
     class Meta:
-        model = Course
-        fields = "__all__"
-# ------------------------------
-# ✨ NEW: Course Enrollment Serializer
-# ------------------------------
+        model  = Course
+        fields = (
+            "id", "title", "description", "created_at",
+            "teacher", "teacher_id",
+            "students",
+        )
+
 
 
 class CourseEnrollSerializer(serializers.ModelSerializer):
@@ -136,3 +146,4 @@ class CourseEnrollSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'students': {'required': True}
         }
+

@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView
 from api import serializers as api_serializer
-from rest_framework import generics, viewsets
+from rest_framework import generics, viewsets, permissions, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from userauths.models import User
-from core.models import Course  # <-- NEW import
-from api.permissions import IsTeacherOrReadOnly  # <-- import it
+from core.models import Course
+from api.permissions import IsTeacherOrReadOnly
+from api.serializers import TeacherMiniSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -66,7 +66,6 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response({"status": f"{student.email} enrolled successfully."},
                         status=status.HTTP_200_OK)
 
-    # ---------- NEW 1: UNENROL ----------
     @action(detail=True, methods=["post"], permission_classes=[IsTeacherOrReadOnly])
     def unenroll(self, request, pk=None):
         """
@@ -89,14 +88,16 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response({"status": f"{student.email} removed from course."},
                         status=status.HTTP_200_OK)
 
-    # ---------- NEW 2: DELETE (optional override) ----------
-    # ModelViewSet already provides DELETE /courses/<id>/, and
-    # IsTeacherOrReadOnly blocks non-teachers, so overriding isn’t required.
-    # If you want a friendlier message you can uncomment below.
-
     def destroy(self, request, *args, **kwargs):
         if request.user.role != "teacher":
             return Response({"detail": "Only teachers can delete courses."},
                             status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
+    
+    def perform_create(self, serializer):
+        serializer.save() 
 
+class TeacherListView(generics.ListAPIView):
+    serializer_class = TeacherMiniSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.filter(role="teacher")
