@@ -1,5 +1,6 @@
 import apiInstance from "./axios";
 
+
 /**
  * Fetch all courses.
  * @returns {Promise}
@@ -36,4 +37,16 @@ export const updateCourse = (courseId, courseData) => {
  */
 export const deleteCourse = (courseId) => {
   return apiInstance.delete(`/courses/${courseId}/`);
+};
+
+/**
+ * Enroll a student into a course by email.
+ * @param {number} courseId
+ * @param {string} studentEmail
+ * @returns {Promise}
+ */
+export const enrollStudent = (courseId, studentEmail) => {
+  return apiInstance.post(`/courses/${courseId}/enroll/`, {
+    student_email: studentEmail,
+  });
 };

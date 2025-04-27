@@ -144,8 +144,13 @@ export const logout = () => {
  * Otherwise, it sets the user with the existing tokens.
  */
 export const setUser = async () => {
-  const access_token = Cookie.get("access_token");
-  const refresh_token = Cookie.get("refresh_token");
+  const cookieAccess = Cookie.get("access_token");
+  const lsAccess = localStorage.getItem("accessToken");
+  const access_token = cookieAccess || lsAccess;
+
+  const cookieRefresh = Cookie.get("refresh_token");
+  const lsRefresh = localStorage.getItem("refreshToken");
+  const refresh_token = cookieRefresh || lsRefresh;
 
   if (!access_token || !refresh_token) {
     return;
@@ -172,6 +177,8 @@ export const setAuthUser = async (access_token, refresh_token) => {
   Cookie.set("refresh_token", refresh_token, {
     expires: 7,
   });
+  localStorage.setItem("accessToken", access_token);
+  localStorage.setItem("refreshToken", refresh_token);
 
   const user = jwt_decode(access_token) ?? null;
 

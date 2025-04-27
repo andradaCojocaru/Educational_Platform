@@ -25,6 +25,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["full_name"] = user.full_name
         token["email"] = user.email
         token["username"] = user.username
+        token["role"] = user.role   # <-- ✨ ADD THIS LINE
 
         return token
 
@@ -110,7 +111,28 @@ class CourseSerializer(serializers.ModelSerializer):
     """
     Serializes Course model data.
     """
+    students = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='email'
+    )
 
     class Meta:
         model = Course
         fields = "__all__"
+# ------------------------------
+# ✨ NEW: Course Enrollment Serializer
+# ------------------------------
+
+
+class CourseEnrollSerializer(serializers.ModelSerializer):
+    """
+    Serializer to enroll users into a course (only students field exposed).
+    """
+
+    class Meta:
+        model = Course
+        fields = ['id', 'students']
+        extra_kwargs = {
+            'students': {'required': True}
+        }
