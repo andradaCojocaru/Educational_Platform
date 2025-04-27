@@ -1,36 +1,31 @@
+// src/pages/Courses.jsx
+
 import React, { useState, useEffect } from "react";
-import { getCourses, createCourse, enrollStudent } from "../../utils/courses";
+import { getCourses, createCourse, enrollStudent, deleteCourse, unenrollStudent } from "../../utils/courses";
 import { useAuthStore } from "../../store/auth";
 
 const Courses = () => {
-  const { user, loadingState } = useAuthStore(); // <-- add loadingState
-
-  console.log("User loaded:", user);
+  const { user, loadingState } = useAuthStore(); // assuming you have this
   const [courses, setCourses] = useState([]);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-  });
+  const [formData, setFormData] = useState({ title: "", description: "" });
   const [enrollData, setEnrollData] = useState({});
-  const [showStudents, setShowStudents] = useState({}); // NEW: track shown students per course
+  const [showStudents, setShowStudents] = useState({}); // show/hide students per course
 
   const fetchCourses = async (currentUser) => {
-    console.log("Fetching courses for user:", currentUser);
+    try {
+      const response = await getCourses();
+      const allCourses = response.data;
 
-    const response = await getCourses();
-    console.log("Raw course list from server:", response.data);
-
-    const allCourses = response.data;
-
-    if (currentUser?.role === "student") {
-      const enrolledCourses = allCourses.filter((course) =>
-        course.students.includes(currentUser.email)
-      );
-      console.log("Student enrolled courses:", enrolledCourses);
-      setCourses(enrolledCourses);
-    } else {
-      console.log("Teacher sees all courses:", allCourses);
-      setCourses(allCourses);
+      if (currentUser?.role === "student") {
+        const enrolledCourses = allCourses.filter((course) =>
+          course.students.includes(currentUser.email)
+        );
+        setCourses(enrolledCourses);
+      } else {
+        setCourses(allCourses);
+      }
+    } catch (error) {
+      console.error("Error fetching courses:", error);
     }
   };
 
@@ -53,10 +48,36 @@ const Courses = () => {
       await enrollStudent(courseId, enrollData[courseId]);
       alert("Student enrolled successfully!");
       setEnrollData((prev) => ({ ...prev, [courseId]: "" }));
-      fetchCourses(user); // ✅ CORRECT
+      fetchCourses(user);
     } catch (error) {
       console.error("Error enrolling student:", error);
       alert("Failed to enroll student.");
+    }
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    if (window.confirm("Are you sure you want to delete this course?")) {
+      try {
+        await deleteCourse(courseId);
+        alert("Course deleted successfully!");
+        fetchCourses(user);
+      } catch (error) {
+        console.error("Error deleting course:", error);
+        alert("Failed to delete course.");
+      }
+    }
+  };
+
+  const handleUnenroll = async (courseId, studentEmail) => {
+    if (window.confirm(`Are you sure you want to unenroll ${studentEmail}?`)) {
+      try {
+        await unenrollStudent(courseId, studentEmail);
+        alert("Student unenrolled successfully!");
+        fetchCourses(user);
+      } catch (error) {
+        console.error("Error unenrolling student:", error);
+        alert("Failed to unenroll student.");
+      }
     }
   };
 
@@ -72,9 +93,10 @@ const Courses = () => {
     try {
       await createCourse(formData);
       setFormData({ title: "", description: "" });
-      fetchCourses(user); // ✅ CORRECT
+      fetchCourses(user);
     } catch (error) {
       console.error("Error creating course:", error);
+      alert("Failed to create course.");
     }
   };
 
@@ -87,6 +109,8 @@ const Courses = () => {
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Courses</h1>
+
+      {/* Form for teachers to create a course */}
       {user?.role === "teacher" && (
         <form onSubmit={handleSubmit} style={{ marginBottom: "2rem" }}>
           <div>
@@ -117,6 +141,7 @@ const Courses = () => {
         </form>
       )}
 
+      {/* List of courses */}
       <div
         style={{
           display: "grid",
@@ -136,32 +161,51 @@ const Courses = () => {
           >
             <h3>{course.title}</h3>
             <p>{course.description}</p>
-            <small>
-              Created at: {new Date(course.created_at).toLocaleString()}
-            </small>
+            <small>Created at: {new Date(course.created_at).toLocaleString()}</small>
 
-            {/* ✨ Enroll student form */}
+            {/* Teacher actions */}
             {user?.role === "teacher" && (
-              <div style={{ marginTop: "1rem" }}>
-                <input
-                  type="email"
-                  placeholder="Student Email"
-                  value={enrollData[course.id] || ""}
-                  onChange={(e) =>
-                    handleEnrollChange(course.id, e.target.value)
-                  }
-                  style={{ marginRight: "0.5rem", padding: "0.25rem" }}
-                />
-                <button
-                  onClick={() => handleEnroll(course.id)}
-                  style={{ padding: "0.25rem 0.5rem" }}
-                >
-                  Enroll Student
-                </button>
-              </div>
+              <>
+                {/* Enroll a student */}
+                <div style={{ marginTop: "1rem" }}>
+                  <input
+                    type="email"
+                    placeholder="Student Email"
+                    value={enrollData[course.id] || ""}
+                    onChange={(e) =>
+                      handleEnrollChange(course.id, e.target.value)
+                    }
+                    style={{ marginRight: "0.5rem", padding: "0.25rem" }}
+                  />
+                  <button
+                    onClick={() => handleEnroll(course.id)}
+                    style={{ padding: "0.25rem 0.5rem" }}
+                  >
+                    Enroll Student
+                  </button>
+                </div>
+
+                {/* Delete course */}
+                <div style={{ marginTop: "1rem" }}>
+                  <button
+                    onClick={() => handleDeleteCourse(course.id)}
+                    style={{
+                      padding: "0.5rem",
+                      backgroundColor: "red",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      marginTop: "0.5rem",
+                    }}
+                  >
+                    Delete Course
+                  </button>
+                </div>
+              </>
             )}
 
-            {/* ✨ Show students button */}
+            {/* Show students toggle */}
             <div style={{ marginTop: "1rem" }}>
               <button
                 onClick={() => toggleStudents(course.id)}
@@ -170,12 +214,37 @@ const Courses = () => {
                 {showStudents[course.id] ? "Hide Students" : "Show Students"}
               </button>
 
-              {/* ✨ Display list if visible */}
+              {/* Students list */}
               {showStudents[course.id] && (
                 <ul style={{ marginTop: "0.5rem" }}>
                   {course.students.length > 0 ? (
                     course.students.map((email, idx) => (
-                      <li key={idx}>{email}</li>
+                      <li
+                        key={idx}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        {email}
+                        {user?.role === "teacher" && (
+                          <button
+                            onClick={() => handleUnenroll(course.id, email)}
+                            style={{
+                              marginLeft: "1rem",
+                              padding: "0.25rem",
+                              backgroundColor: "orange",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Unenroll
+                          </button>
+                        )}
+                      </li>
                     ))
                   ) : (
                     <li>No students enrolled yet.</li>

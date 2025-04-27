@@ -34,46 +34,69 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = api_serializer.RegisterSerializer
 
-# ------------------------------
-# ✨ NEW: Course ViewSet
-# ------------------------------
-
-
 class CourseViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing Courses with CRUD operations.
+    Teachers get full access; everyone else is read-only.
     """
     queryset = Course.objects.all()
     serializer_class = api_serializer.CourseSerializer
-    permission_classes = [IsTeacherOrReadOnly]   # <-- replace IsAuthenticated
+    permission_classes = [IsTeacherOrReadOnly]          # already blocks non-teachers
 
-
-class CourseViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for managing Courses with CRUD operations.
-    """
-    queryset = Course.objects.all()
-    serializer_class = api_serializer.CourseSerializer
-    permission_classes = [IsTeacherOrReadOnly]
-
-    @action(detail=True, methods=['post'], permission_classes=[IsTeacherOrReadOnly])
+    # ---------- EXISTING ACTION ----------
+    @action(detail=True, methods=["post"], permission_classes=[IsTeacherOrReadOnly])
     def enroll(self, request, pk=None):
         """
-        Custom action to enroll a student into a course using email.
-        Only a teacher can perform this action.
+        Enrol a student.  Body: {"student_email": "..."}
         """
         course = self.get_object()
-        student_email = request.data.get('student_email')
+        student_email = request.data.get("student_email")
 
         if not student_email:
-            return Response({'error': 'student_email is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "student_email is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            student = User.objects.get(email=student_email, role='student')
+            student = User.objects.get(email=student_email, role="student")
         except User.DoesNotExist:
-            return Response({'error': 'Student with this email not found or invalid role'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Student not found or wrong role"},
+                            status=status.HTTP_404_NOT_FOUND)
 
         course.students.add(student)
-        course.save()
+        return Response({"status": f"{student.email} enrolled successfully."},
+                        status=status.HTTP_200_OK)
 
-        return Response({'status': f'Student {student.full_name} enrolled successfully.'})
+    # ---------- NEW 1: UNENROL ----------
+    @action(detail=True, methods=["post"], permission_classes=[IsTeacherOrReadOnly])
+    def unenroll(self, request, pk=None):
+        """
+        Remove a student from the course.  Body: {"student_email": "..."}
+        """
+        course = self.get_object()
+        student_email = request.data.get("student_email")
+
+        if not student_email:
+            return Response({"error": "student_email is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            student = User.objects.get(email=student_email, role="student")
+        except User.DoesNotExist:
+            return Response({"error": "Student not found or wrong role"},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        course.students.remove(student)
+        return Response({"status": f"{student.email} removed from course."},
+                        status=status.HTTP_200_OK)
+
+    # ---------- NEW 2: DELETE (optional override) ----------
+    # ModelViewSet already provides DELETE /courses/<id>/, and
+    # IsTeacherOrReadOnly blocks non-teachers, so overriding isn’t required.
+    # If you want a friendlier message you can uncomment below.
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.role != "teacher":
+            return Response({"detail": "Only teachers can delete courses."},
+                            status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
+

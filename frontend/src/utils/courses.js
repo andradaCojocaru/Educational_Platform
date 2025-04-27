@@ -50,3 +50,10 @@ export const enrollStudent = (courseId, studentEmail) => {
     student_email: studentEmail,
   });
 };
+/**
+ * Un-enroll a student.
+ */
+export const unenrollStudent = (courseId, studentEmail) =>
+  apiInstance.post(`courses/${courseId}/unenroll/`, {
+    student_email: studentEmail,
+  });

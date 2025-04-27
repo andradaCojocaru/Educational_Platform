@@ -74,3 +74,4 @@ yarn-error.log*
 media/
 staticfiles/
 staticfiles_build/
+*.pyc
