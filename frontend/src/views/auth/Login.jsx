@@ -45,8 +45,6 @@ function Login() {
 
   return (
     <>
-      <BaseHeader />
-
       <section
         className="container d-flex flex-column vh-100"
         style={{ marginTop: "150px" }}
@@ -148,8 +146,6 @@ function Login() {
           </div>
         </div>
       </section>
-
-      <BaseFooter />
     </>
   );
 }

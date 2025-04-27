@@ -46,8 +46,6 @@ function Register() {
 
   return (
     <>
-      <BaseHeader />
-
       <section
         className="container d-flex flex-column vh-100"
         style={{ marginTop: "150px" }}
@@ -175,8 +173,6 @@ function Register() {
           </div>
         </div>
       </section>
-
-      <BaseFooter />
     </>
   );
 }
