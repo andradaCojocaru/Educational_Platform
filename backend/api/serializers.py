@@ -4,6 +4,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from api import models as api_models
 from userauths.models import Profile, User
+from core.models import Course
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
@@ -23,8 +25,10 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["full_name"] = user.full_name
         token["email"] = user.email
         token["username"] = user.username
+        token["role"] = user.role
 
         return token
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
@@ -73,7 +77,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializes User model data.
@@ -99,4 +102,48 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = "__all__"
 
+class TeacherMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = User
+        fields = ("id", "full_name", "email") 
+
+class CourseSerializer(serializers.ModelSerializer):
+    """
+    Full course representation.
+    * `teacher`   → read-only nested object
+    * `teacher_id`→ write-only FK you post from the client
+    * `students`  → list of student emails (read-only)
+    """
+    teacher     = TeacherMiniSerializer(read_only=True)
+    teacher_id  = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role="teacher"),
+        source="teacher",
+        write_only=True,
+        required=True,
+    )
+    students = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="email"
+    )
+
+    class Meta:
+        model  = Course
+        fields = (
+            "id", "title", "description", "created_at",
+            "teacher", "teacher_id",
+            "students",
+        )
+
+
+
+class CourseEnrollSerializer(serializers.ModelSerializer):
+    """
+    Serializer to enroll users into a course (only students field exposed).
+    """
+
+    class Meta:
+        model = Course
+        fields = ['id', 'students']
+        extra_kwargs = {
+            'students': {'required': True}
+        }
 

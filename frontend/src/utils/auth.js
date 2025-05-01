@@ -26,7 +26,8 @@ export const userLogin = async (email, password) => {
     });
 
     if (status === 200) {
-      setAuthUser(data.access, data.refresh);
+      localStorage.setItem("accessToken", data.access);
+      localStorage.setItem("refreshToken", data.refresh); // keep if you need
       return { response: data, error: null };
     }
   } catch (error) {
@@ -143,19 +144,29 @@ export const logout = () => {
  * Otherwise, it sets the user with the existing tokens.
  */
 export const setUser = async () => {
-  const access_token = Cookie.get("access_token");
-  const refresh_token = Cookie.get("refresh_token");
+  const cookieAccess = Cookie.get("access_token");
+  const lsAccess = localStorage.getItem("accessToken");
+  const access_token = cookieAccess || lsAccess;
+
+  const cookieRefresh = Cookie.get("refresh_token");
+  const lsRefresh = localStorage.getItem("refreshToken");
+  const refresh_token = cookieRefresh || lsRefresh;
 
   if (!access_token || !refresh_token) {
     return;
   }
 
   if (isAccessTokenExpired(access_token)) {
-    const response = getRefreshedToken(refresh_token);
-    setAuthUser(response.access, response.refresh);
-  } else {
-    setAuthUser(access_token, refresh_token);
-  }
+      try {
+        const { access, refresh } = await getRefreshedToken(refresh_token);
+        await setAuthUser(access, refresh);
+      } catch (err) {
+        logout();
+        return;
+      }
+    } else {
+      await setAuthUser(access_token, refresh_token);
+    }
 };
 
 /**
@@ -166,15 +177,21 @@ export const setUser = async () => {
 export const setAuthUser = async (access_token, refresh_token) => {
   Cookie.set("access_token", access_token, {
     expires: 1,
-    secure: true,
   });
 
   Cookie.set("refresh_token", refresh_token, {
     expires: 7,
-    secure: true,
   });
+  localStorage.setItem("accessToken", access_token);
+  localStorage.setItem("refreshToken", refresh_token);
 
-  const user = jwt_decode(access_token) ?? null;
+  let user = null;
+  try {
+    user = jwt_decode(access_token);
+  } catch (e) {
+    logout();
+    return;
+  }
 
   if (user) {
     useAuthStore.getState().setUser(user);
@@ -187,13 +204,21 @@ export const setAuthUser = async (access_token, refresh_token) => {
  *
  * @returns {Promise<{ access: string, refresh: string }>} - The refreshed tokens.
  */
-export const getRefreshedToken = async () => {
-  const refresh_token = Cookie.get("refresh_token");
-  const response = await axios.post(`user/token/refresh/`, {
-    refresh: refresh_token,
+export const getRefreshedToken = async (refresh_token_arg) => {
+  const refresh_token =
+  refresh_token_arg ||
+  Cookie.get("refresh_token") ||
+  localStorage.getItem("refreshToken");
+  
+  if (!refresh_token) {
+    throw new Error("No refresh token available");
+  }
+  
+  const { data } = await axios.post(`user/token/refresh/`, {
+  refresh: refresh_token,
   });
-  return response.data;
-};
+  return data;
+  };
 
 /**
  * Checks if the provided access token is expired.

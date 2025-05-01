@@ -7,7 +7,12 @@ import BaseFooter from "../partials/BaseFooter";
 
 import { userLogin } from "../../utils/auth";
 
+import jwt_decode from "jwt-decode";
+import { useAuthStore } from "../../store/auth"; // <-- Keep import
+
 function Login() {
+  const { setUser } = useAuthStore(); // <-- ✅ move inside component
+
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [isLoadingState, setIsLoadingState] = useState(false);
@@ -17,7 +22,9 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoadingState(true);
-    const { error } = await userLogin(userEmail, userPassword);
+
+    const { response, error } = await userLogin(userEmail, userPassword);
+
     if (error) {
       setIsLoadingState(false);
       Toast().fire({
@@ -25,15 +32,19 @@ function Login() {
         text: error,
       });
     } else {
-      navigate("/");
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        const decodedUser = jwt_decode(accessToken);
+        setUser(decodedUser); // <-- directly set the user!
+      }
+
+      navigate("/courses");
       setIsLoadingState(false);
     }
   };
 
   return (
     <>
-      <BaseHeader />
-
       <section
         className="container d-flex flex-column vh-100"
         style={{ marginTop: "150px" }}
@@ -135,8 +146,6 @@ function Login() {
           </div>
         </div>
       </section>
-
-      <BaseFooter />
     </>
   );
 }

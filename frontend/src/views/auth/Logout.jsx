@@ -13,8 +13,6 @@ function Logout() {
 
   return (
     <>
-      <BaseHeader />
-
       <section
         className="container d-flex flex-column vh-100"
         style={{ marginTop: "150px" }}
@@ -44,8 +42,6 @@ function Logout() {
           </div>
         </div>
       </section>
-
-      <BaseFooter />
     </>
   );
 }

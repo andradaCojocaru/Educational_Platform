@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-     # Custom Apps
+    # Custom Apps
     'core',
     'userauths',
     'api',
@@ -52,7 +52,19 @@ INSTALLED_APPS = [
     "drf_yasg",  # Swagger
 ]
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    # optional – make everything private by default
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+}
+
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # ⚡ Must be very high (top 3)
+    "django.middleware.common.CommonMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -170,5 +182,12 @@ AUTH_USER_MODEL = 'userauths.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS = True
+
+# Allow frontend Vite (localhost:5173) to call backend (localhost:8000)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# If you want to allow everything temporarily:
+# CORS_ALLOW_ALL_ORIGINS = True
