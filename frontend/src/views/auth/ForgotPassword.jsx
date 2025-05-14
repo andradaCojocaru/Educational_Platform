@@ -1,9 +1,5 @@
 import { useState } from "react";
 import Toast from "../plugin/Toast";
-
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
-
 import apiInstance from "../../utils/axios";
 
 function ForgotPassword() {
@@ -29,8 +25,6 @@ function ForgotPassword() {
 
   return (
     <>
-      <BaseHeader />
-
       <section
         className="container d-flex flex-column vh-100"
         style={{ marginTop: "150px" }}
@@ -88,8 +82,6 @@ function ForgotPassword() {
           </div>
         </div>
       </section>
-
-      <BaseFooter />
     </>
   );
 }

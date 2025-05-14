@@ -1,6 +1,7 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
+import { Link, useNavigate, NavLink } from "react-router-dom";
+import { logout } from "../../utils/auth";
 
 function BaseHeader() {
   const navigate = useNavigate();
@@ -8,6 +9,11 @@ function BaseHeader() {
     state.isLoggedIn,
     state.user,
   ]);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  }
 
   return (
     <div>
@@ -34,12 +40,12 @@ function BaseHeader() {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             {isLoggedIn() === true ? (
               <ul className="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <Link to="/courses" className="nav-link">
                     Courses
                   </Link>
-                </li>
-                <li className="nav-item">
+                </li> */}
+                {/* <li className="nav-item">
                   <Link to="/students" className="nav-link">
                     Students
                   </Link>
@@ -53,11 +59,22 @@ function BaseHeader() {
                   <Link to="/settings" className="nav-link">
                     Settings
                   </Link>
-                </li>
+                </li> */}
+
+
+
+                {/* <li className="nav-item">
+                  <NavLink className="nav-link" to="/forgot-password">
+                    Change&nbsp;Password
+                  </NavLink>
+                </li> */}
                 <li className="nav-item">
-                  <Link to="/logout" className="btn btn-primary ms-3">
+                  <button
+                    className="btn btn-primary ms-3"
+                    onClick={handleLogout}
+                  >
                     Logout
-                  </Link>
+                  </button>
                 </li>
               </ul>
             ) : (

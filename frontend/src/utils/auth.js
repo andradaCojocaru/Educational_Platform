@@ -133,9 +133,26 @@ export const userRegister = async (
  * Logs out the user by removing access and refresh tokens from cookies and resetting the user state.
  */
 export const logout = () => {
+  // 1. șterge token-urile din cookie
   Cookie.remove("access_token");
   Cookie.remove("refresh_token");
-  useAuthStore.getState().setUser(null);
+
+  // 2. șterge token-urile din LocalStorage
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+
+  // 3. scoate Authorization default din axios (dacă îl setezi acolo)
+  if (axios?.defaults?.headers?.common?.Authorization) {
+      delete axios.defaults.headers.common["Authorization"];
+    }
+
+  // 4. goliți store-ul și marcați ca “nu mai încarc”
+  const { setUser, setLoadingState } = useAuthStore.getState();
+  setUser(null);
+  setLoadingState(false);
+
+  // 5. redirecționează – dacă folosiți react-router-dom v6
+  window.location.replace("/login");
 };
 
 /**
