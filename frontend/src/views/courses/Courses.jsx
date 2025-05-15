@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import CourseStatsChart from "../../../components/CourseStatsChart";
 
-import { getCourses, getTeachers, createCourse, enrollStudent, deleteCourse, unenrollStudent } from "../../utils/courses";
+import {
+  getCourses,
+  getTeachers,
+  createCourse,
+  enrollStudent,
+  deleteCourse,
+  unenrollStudent,
+  updateCourse, // Add this utility for updating courses
+} from "../../utils/courses";
 import { useAuthStore } from "../../store/auth";
 
 const Courses = () => {
@@ -11,6 +19,8 @@ const Courses = () => {
   const [formData, setFormData] = useState({ title: "", description: "", teacher_id: "" });
   const [enrollData, setEnrollData] = useState({});
   const [showStudents, setShowStudents] = useState({});
+  const [editingCourseId, setEditingCourseId] = useState(null); // Track which course is being edited
+  const [editDescription, setEditDescription] = useState(""); // Track the updated description
 
   const fetchCourses = async (currentUser) => {
     try {
@@ -30,11 +40,25 @@ const Courses = () => {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  const handleEditClick = (course) => {
+    setEditingCourseId(course.id);
+    setEditDescription(course.description);
+  };
+
+  const handleUpdateCourse = async (courseId) => {
+    try {
+      await updateCourse(courseId, { description: editDescription });
+      alert("Course description updated successfully!");
+      setEditingCourseId(null); // Exit editing mode
+      fetchCourses(user); // Refresh courses
+    } catch (error) {
+      console.error("Error updating course:", error);
+      alert("Failed to update course.");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCourseId(null); // Exit editing mode
   };
 
   const handleEnrollChange = (courseId, value) => {
@@ -53,32 +77,6 @@ const Courses = () => {
     } catch (error) {
       console.error("Error enrolling student:", error);
       alert("Failed to enroll student.");
-    }
-  };
-
-  const handleDeleteCourse = async (courseId) => {
-    if (window.confirm("Are you sure you want to delete this course?")) {
-      try {
-        await deleteCourse(courseId);
-        alert("Course deleted successfully!");
-        fetchCourses(user);
-      } catch (error) {
-        console.error("Error deleting course:", error);
-        alert("Failed to delete course.");
-      }
-    }
-  };
-
-  const handleUnenroll = async (courseId, studentEmail) => {
-    if (window.confirm(`Are you sure you want to unenroll ${studentEmail}?`)) {
-      try {
-        await unenrollStudent(courseId, studentEmail);
-        alert("Student unenrolled successfully!");
-        fetchCourses(user);
-      } catch (error) {
-        console.error("Error unenrolling student:", error);
-        alert("Failed to unenroll student.");
-      }
     }
   };
 
@@ -116,14 +114,16 @@ const Courses = () => {
       )}
       {/* Form for teachers to create a course */}
       {user?.role === "teacher" && (
-        <form onSubmit={handleSubmit} style={{ marginBottom: "2rem"}}>
+        <form onSubmit={handleSubmit} style={{ marginBottom: "2rem" }}>
           <div>
             <input
               type="text"
               name="title"
               placeholder="Course Title"
               value={formData.title}
-              onChange={handleChange}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+              }
               required
               style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%" }}
             />
@@ -133,11 +133,15 @@ const Courses = () => {
             <select
               name="teacher_id"
               value={formData.teacher_id}
-              onChange={handleChange}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+              }
               required
               style={{ padding: "0.4rem" }}
             >
-              <option value="" disabled>Choose…</option>
+              <option value="" disabled>
+                Choose…
+              </option>
               {teachers.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.full_name} ({t.email})
@@ -150,7 +154,9 @@ const Courses = () => {
               name="description"
               placeholder="Course Description"
               value={formData.description}
-              onChange={handleChange}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+              }
               required
               rows="4"
               style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%" }}
@@ -185,98 +191,130 @@ const Courses = () => {
               <strong>Teacher:</strong>{" "}
               {course.teacher ? course.teacher.full_name : "—"}
             </p>
-            <p>{course.description}</p>
 
-            {/* Teacher actions */}
-            {user?.role === "teacher" && (
+            {/* Editable description */}
+            {editingCourseId === course.id ? (
+              <div>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows="4"
+                  style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%" }}
+                />
+                <button
+                  onClick={() => handleUpdateCourse(course.id)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    backgroundColor: "green",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    marginRight: "0.5rem",
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    backgroundColor: "gray",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
               <>
-                {/* Enroll a student */}
-                <div style={{ marginTop: "1rem" }}>
-                  <input
-                    type="email"
-                    placeholder="Student Email"
-                    value={enrollData[course.id] || ""}
-                    onChange={(e) =>
-                      handleEnrollChange(course.id, e.target.value)
-                    }
-                    style={{ marginBottom: "0.5rem", marginRight: "0.5rem", padding: "0.25rem" }}
-                  />
+                <p>{course.description}</p>
+                {user?.role === "teacher" && (
                   <button
-                    onClick={() => handleEnroll(course.id)}
-                    style={{ padding: "0.25rem 0.5rem" }}
-                  >
-                    Enroll Student
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Show students toggle */}
-            <div style={{ marginTop: "1rem" }}>
-              <button
-                onClick={() => toggleStudents(course.id)}
-                style={{ padding: "0.25rem 0.5rem" }}
-              >
-                {showStudents[course.id] ? "Hide Students" : "Show Students"}
-              </button>
-
-              {/* Students list */}
-              {showStudents[course.id] && (
-                <ul style={{ marginTop: "0.5rem", paddingLeft: 0, listStyle: "none" }}>
-                  {course.students.length > 0 ? (
-                    course.students.map((email, idx) => (
-                      <li
-                        key={idx}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          flexWrap: "wrap",
-                          wordBreak: "break-word"
-                        }}
-                      >
-                        <span style={{ flex: "1 1 auto" }}>{email}</span>
-                        {user?.role === "teacher" && (
-                          <button
-                            onClick={() => handleUnenroll(course.id, email)}
-                            style={{
-                              marginLeft: "1rem",
-                              marginBottom: "0.35rem",
-                              padding: "0.25rem",
-                              backgroundColor: "orange",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Unenroll
-                          </button>
-                        )}
-                      </li>
-                    ))
-                  ) : (
-                    <li>No students enrolled yet.</li>
-                  )}
-                </ul>
-              )}
-
-                {/* Delete course */}
-                <div style={{ marginTop: "1rem" }}>
-                  <button
-                    onClick={() => handleDeleteCourse(course.id)}
+                    onClick={() => handleEditClick(course)}
                     style={{
                       padding: "0.5rem",
-                      backgroundColor: "red",
+                      backgroundColor: "blue",
                       color: "white",
                       border: "none",
                       borderRadius: "4px",
                       cursor: "pointer",
                     }}
                   >
-                    Delete Course
+                    Edit Description
                   </button>
-                </div>
+                )}
+              </>
+            )}
+
+            {/* Enroll student */}
+            {user?.role === "teacher" && (
+              <div style={{ marginTop: "1rem" }}>
+                <input
+                  type="email"
+                  placeholder="Student Email"
+                  value={enrollData[course.id] || ""}
+                  onChange={(e) => handleEnrollChange(course.id, e.target.value)}
+                  style={{ marginBottom: "0.5rem", padding: "0.5rem", width: "100%" }}
+                />
+                <button
+                  onClick={() => handleEnroll(course.id)}
+                  style={{
+                    padding: "0.5rem",
+                    backgroundColor: "blue",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Enroll Student
+                </button>
+              </div>
+            )}
+
+            {/* Show students */}
+            <div style={{ marginTop: "1rem" }}>
+              <button
+                onClick={() => toggleStudents(course.id)}
+                style={{
+                  padding: "0.5rem",
+                  backgroundColor: "blue",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                {showStudents[course.id] ? "Hide Students" : "Show Students"}
+              </button>
+              {showStudents[course.id] && (
+                <ul style={{ marginTop: "0.5rem" }}>
+                  {course.students.map((student) => (
+                    <li key={student}>{student}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Delete course */}
+            <div style={{ marginTop: "1rem" }}>
+              <button
+                onClick={() => handleDeleteCourse(course.id)}
+                style={{
+                  padding: "0.5rem",
+                  backgroundColor: "red",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Delete Course
+              </button>
             </div>
           </div>
         ))}

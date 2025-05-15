@@ -2,7 +2,8 @@ from api import views as api_views
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework import routers
-from api.views import students_in_teacher_courses, get_user_details
+from api.views import students_in_teacher_courses, get_user_details, update_course_description
+
 
 # Create a router and register our viewsets
 router = routers.DefaultRouter()
@@ -16,6 +17,7 @@ urlpatterns = [
     path("user/me/", get_user_details, name="get-user-details"),  # New endpoint
     path("teachers/", api_views.TeacherListView.as_view(), name="teacher-list"),
     path("teacher/students/", students_in_teacher_courses, name="teacher-students"),
+    path("courses/<int:course_id>/", update_course_description, name="update-course-description"),
 
     path("", include(router.urls)),
 ]

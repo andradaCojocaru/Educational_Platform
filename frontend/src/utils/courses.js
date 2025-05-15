@@ -58,4 +58,9 @@ export const unenrollStudent = (courseId, studentEmail) =>
     student_email: studentEmail,
   });
 
-  export const getTeachers = () => apiInstance.get("teachers/");
+export const getTeachers = () => apiInstance.get("teachers/");
+
+
+export const updateCourseDescription = async (courseId, description) => {
+  return await apiInstance.put(`/courses/${courseId}/`, { description });
+};

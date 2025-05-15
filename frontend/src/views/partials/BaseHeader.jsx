@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { UserContext } from "../../context/UserContext";
 
 const BaseHeader = () => {
-  const { userRole, loading } = useContext(UserContext);
+  const { userRole, loading, userName } = useContext(UserContext);
 
   if (loading) return null; // Show nothing while loading
+
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -39,6 +40,11 @@ const BaseHeader = () => {
                 </Link>
               </li>
             )}
+            <li className="nav-item">
+                <span className="nav-link">
+                  Welcome, {userName} ({userRole})
+                </span>
+              </li>
             <li className="nav-item">
               <Link to="/logout" className="btn btn-primary ms-3">
                 Logout

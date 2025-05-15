@@ -147,3 +147,18 @@ def get_user_details(request):
         "full_name": user.full_name,
         "role": user.role,
     })
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_course_description(request, course_id):
+    """
+    Update the description of a course.
+    """
+    try:
+        course = Course.objects.get(id=course_id)
+        course.description = request.data.get("description", course.description)
+        course.save()
+        return Response({"message": "Course description updated successfully!"})
+    except Course.DoesNotExist:
+        return Response({"error": "Course not found or you are not the teacher."}, status=404)
