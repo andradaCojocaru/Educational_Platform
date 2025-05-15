@@ -1,6 +1,6 @@
-- created superuser python3 manage.py createsuperuser - admin admin admin@admin.com
-- migrate python3 manage.py migrate
-- runserver python3 manage.py runserver
+- created superuser -> python3 manage.py createsuperuser - admin admin admin@admin.com
+- migrate -> python3 manage.py migrate
+- runserver -> python3 manage.py runserver
 
 
 - frontend setup
