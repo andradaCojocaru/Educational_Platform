@@ -9,6 +9,11 @@ from api.permissions import IsTeacherOrReadOnly
 from api.serializers import TeacherMiniSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from api.serializers import StudentMiniSerializer
+from rest_framework.decorators import permission_classes
+from core.models import Course
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -101,3 +106,44 @@ class TeacherListView(generics.ListAPIView):
     serializer_class = TeacherMiniSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = User.objects.filter(role="teacher")
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def students_in_teacher_courses(request):
+    """
+    Fetch all students enrolled in the courses taught by the logged-in teacher.
+    """
+    try:
+        if request.user.role != "teacher":
+            return Response({"detail": "Only teachers can view their students."},
+                            status=403)
+
+        # Get all courses taught by the teacher
+        teacher_courses = Course.objects.filter(teacher=request.user)
+
+        # Get all students enrolled in those courses
+        students = User.objects.filter(role="student", enrolled_courses__in=teacher_courses).distinct()
+
+        # Serialize the students
+        student_data = [
+            {"id": student.id, "full_name": student.full_name, "email": student.email}
+            for student in students
+        ]
+        return Response(student_data, status=200)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+    
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_user_details(request):
+    """
+    API endpoint to fetch the current user's details.
+    """
+    user = request.user
+    return Response({
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "role": user.role,
+    })

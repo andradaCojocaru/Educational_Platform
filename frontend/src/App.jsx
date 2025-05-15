@@ -9,6 +9,7 @@ import Login from "../src/views/auth/Login";
 import Logout from "./views/auth/Logout";
 import ForgotPassword from "./views/auth/ForgotPassword";
 import CreateNewPassword from "./views/auth/CreateNewPassword";
+import TeacherStudents from "./views/students/TeacherStudents";
 
 import Courses from "./views/courses/Courses";
 
@@ -32,6 +33,7 @@ function App() {
           <Route path="/forgot-password/" element={<ForgotPassword />} />
           <Route path="/create-new-password/" element={<CreateNewPassword />} />
           <Route path="/courses/" element={<Courses />} />
+          <Route path="/students" element={<TeacherStudents />} />
         </Routes>
       </MainWrapper>
     </BrowserRouter>

@@ -147,3 +147,8 @@ class CourseEnrollSerializer(serializers.ModelSerializer):
             'students': {'required': True}
         }
 
+class StudentMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "full_name", "email", "country"]
+

@@ -22,9 +22,9 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoadingState(true);
-
+  
     const { response, error } = await userLogin(userEmail, userPassword);
-
+  
     if (error) {
       setIsLoadingState(false);
       Toast().fire({
@@ -35,10 +35,10 @@ function Login() {
       const accessToken = localStorage.getItem("accessToken");
       if (accessToken) {
         const decodedUser = jwt_decode(accessToken);
-        setUser(decodedUser); // <-- directly set the user!
+        setUser(decodedUser); // Update the global user state
       }
-
       navigate("/courses");
+      window.location.reload(); // Force a full page reload to re-render the header
       setIsLoadingState(false);
     }
   };
