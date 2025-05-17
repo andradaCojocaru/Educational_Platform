@@ -1,12 +1,17 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/UserContext";
 
 const BaseHeader = () => {
-  const { userRole, loading, userName } = useContext(UserContext);
+  const { userRole, loading, userName, logout } = useContext(UserContext);
+  const navigate = useNavigate();
 
-  if (loading) return null; // Show nothing while loading
+  if (loading) return null;
 
+  const handleLogout = () => {
+    logout(); // Clear context + localStorage
+    navigate("/login"); // Redirect to login page
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -40,15 +45,17 @@ const BaseHeader = () => {
                 </Link>
               </li>
             )}
-            <li className="nav-item">
+            {userName && (
+              <li className="nav-item">
                 <span className="nav-link">
                   Welcome, {userName} ({userRole})
                 </span>
               </li>
+            )}
             <li className="nav-item">
-              <Link to="/logout" className="btn btn-primary ms-3">
+              <button onClick={handleLogout} className="btn btn-primary ms-3">
                 Logout
-              </Link>
+              </button>
             </li>
           </ul>
         </div>

@@ -4,30 +4,38 @@ import apiInstance from "../utils/axios";
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [userName, setUserName] = useState(null); // State for username
-  const [userRole, setUserRole] = useState(null); // State for user role
+  const [userName, setUserName] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const response = await apiInstance.get("/user/me/");
-        setUserName(response.data.full_name); // Set the username
-        setUserRole(response.data.role); // Set the user role
-      } catch (error) {
-        console.error("Failed to fetch user details:", error);
-        setUserName(null);
-        setUserRole(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchUserDetails = async () => {
+    try {
+      const response = await apiInstance.get("/user/me/");
+      setUserName(response.data.full_name);
+      setUserRole(response.data.role);
+    } catch (error) {
+      console.error("Failed to fetch user details:", error);
+      setUserName(null);
+      setUserRole(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUserDetails();
   }, []);
 
+  // 🧼 Logout function
+  const logout = () => {
+    setUserName(null);
+    setUserRole(null);
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+  };
+
   return (
-    <UserContext.Provider value={{ userName, userRole, loading }}>
+    <UserContext.Provider value={{ userName, userRole, loading, logout }}>
       {children}
     </UserContext.Provider>
   );
