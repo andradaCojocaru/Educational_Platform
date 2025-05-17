@@ -40,3 +40,15 @@
 .read-the-docs {
   color: #888;
 } */
+
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-image: url('"C:\Educational_Platform\picture\10-Benefits-Showing-Why-Education-Is-Important-to-Our-Society.jpg"'); /* Replace with your image path */
+  background-size: cover; /* Make the image cover the entire background */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent the image from repeating */
+  height: 100vh; /* Ensure it covers the full viewport height */
+}

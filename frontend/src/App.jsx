@@ -10,6 +10,7 @@ import Logout from "./views/auth/Logout";
 import ForgotPassword from "./views/auth/ForgotPassword";
 import CreateNewPassword from "./views/auth/CreateNewPassword";
 import TeacherStudents from "./views/students/TeacherStudents";
+import Home from "./views/auth/Home";
 
 import Courses from "./views/courses/Courses";
 
@@ -26,7 +27,7 @@ function App() {
       <MainWrapper>
         <Routes>
           {/* Auth Routes */}
-
+          <Route path="/" element={<Home />} />
           <Route path="/register/" element={<Register />} />
           <Route path="/login/" element={<Login />} />
           <Route path="/logout/" element={<Logout />} />
@@ -34,6 +35,7 @@ function App() {
           <Route path="/create-new-password/" element={<CreateNewPassword />} />
           <Route path="/courses/" element={<Courses />} />
           <Route path="/students" element={<TeacherStudents />} />
+
         </Routes>
       </MainWrapper>
     </BrowserRouter>
