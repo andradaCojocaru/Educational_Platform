@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CourseStatsChart from "../../../components/CourseStatsChart";
 import ReviewsChart from "../../../components/ReviewsChart";
+import TeacherContributionChart from "../../../components/TeacherContributionChart";
 
 import {
   getCourses,
@@ -229,6 +230,12 @@ const Courses = () => {
       <div>
       {/* Display the chart for average ratings */}
       {courses.length > 0 && <ReviewsChart courses={courses} />}
+      </div>
+
+      <div>
+      {user?.role === "teacher" && courses.length > 0 && (
+        <TeacherContributionChart courses={courses} />
+      )}
       </div>
       
 
