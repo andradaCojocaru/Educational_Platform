@@ -220,23 +220,23 @@ const Courses = () => {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1>Courses</h1>
-      <div>
-      {user?.role === "teacher" && courses.length > 0 && (
-        <CourseStatsChart courses={courses} />
-      )}
+      
+      <h1>Courses Dashboard</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
+        <div style={{ flex: 1 }}>
+          <CourseStatsChart courses={courses} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <TeacherContributionChart courses={courses} />
+        </div>
       </div>
-
       <div>
       {/* Display the chart for average ratings */}
       {courses.length > 0 && <ReviewsChart courses={courses} />}
       </div>
 
       <div>
-      {user?.role === "teacher" && courses.length > 0 && (
-        <TeacherContributionChart courses={courses} />
-      )}
-      </div>
+</div>
       
 
       {user?.role === "teacher" && (

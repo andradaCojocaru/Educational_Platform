@@ -50,6 +50,7 @@ const TeacherContributionChart = ({ courses }) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false, // Allow custom height and width
     plugins: {
       legend: {
         position: "top",
@@ -61,7 +62,22 @@ const TeacherContributionChart = ({ courses }) => {
     },
   };
 
-  return <Pie data={data} options={options} />;
+  return (
+    <div
+      style={{
+        width: "80%", // Increase width to 80% of the parent container
+        height: "450px", // Increase height to 500px
+        margin: "0 auto", // Center the chart horizontally
+        padding: "1rem",
+        border: "1px solid #ccc",
+        borderRadius: "12px",
+        boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+        textAlign: "center",
+      }}
+    >
+      <Pie data={data} options={options} />
+    </div>
+  );
 };
 
 export default TeacherContributionChart;
