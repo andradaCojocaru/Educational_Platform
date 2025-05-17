@@ -1,66 +1,54 @@
-import apiInstance from "./axios";
+import apiInstance from "./axios"; // Ensure this is imported only once
 
-
-/**
- * Fetch all courses.
- * @returns {Promise}
- */
-export const getCourses = () => {
-  return apiInstance.get("courses/");
+// Function to leave a review
+export const leaveReview = async (courseId, data) => {
+  return await apiInstance.post(`/courses/${courseId}/review/`, data);
 };
 
-/**
- * Create a new course.
- * @param {Object} courseData
- * @param {string} courseData.title
- * @param {string} courseData.description
- * @returns {Promise}
- */
-export const createCourse = (courseData) => {
-  return apiInstance.post("courses/", courseData);
+// Function to get all courses
+export const getCourses = async () => {
+  return await apiInstance.get("/courses/");
 };
 
-/**
- * Update an existing course.
- * @param {number} courseId
- * @param {Object} courseData
- * @returns {Promise}
- */
-export const updateCourse = (courseId, courseData) => {
-  return apiInstance.put(`/courses/${courseId}/`, courseData);
+// Function to get all teachers
+export const getTeachers = async () => {
+  return await apiInstance.get("/teachers/");
 };
 
-/**
- * Delete a course.
- * @param {number} courseId
- * @returns {Promise}
- */
-export const deleteCourse = (courseId) => {
-  return apiInstance.delete(`/courses/${courseId}/`);
+// Function to create a course
+export const createCourse = async (data) => {
+  return await apiInstance.post("/courses/", data);
 };
 
-/**
- * Enroll a student into a course by email.
- * @param {number} courseId
- * @param {string} studentEmail
- * @returns {Promise}
- */
-export const enrollStudent = (courseId, studentEmail) => {
-  return apiInstance.post(`/courses/${courseId}/enroll/`, {
+// Function to enroll a student
+export const enrollStudent = async (courseId, studentEmail) => {
+  return await apiInstance.post(`/courses/${courseId}/enroll/`,  {
     student_email: studentEmail,
   });
 };
-/**
- * Un-enroll a student.
- */
-export const unenrollStudent = (courseId, studentEmail) =>
-  apiInstance.post(`courses/${courseId}/unenroll/`, {
+
+// Function to delete a course
+export const deleteCourse = async (courseId) => {
+  return await apiInstance.delete(`/courses/${courseId}/`);
+};
+
+// Function to unenroll a student
+export const unenrollStudent = async (courseId, studentEmail) => {
+  return await apiInstance.post(`/courses/${courseId}/unenroll/`,  {
     student_email: studentEmail,
   });
+};
 
-export const getTeachers = () => apiInstance.get("teachers/");
+// Function to update a course
+export const updateCourse = async (courseId, data) => {
+  return await apiInstance.put(`/courses/${courseId}/`, data);
+};
 
+export const rateCourse = async (courseId, data) => {
+  return await apiInstance.post(`/courses/${courseId}/rate/`, data);
+};
 
-export const updateCourseDescription = async (courseId, description) => {
-  return await apiInstance.put(`/courses/${courseId}/`, { description });
+// Function to fetch a user's review for a specific course
+export const getUserReview = async (courseId) => {
+  return await apiInstance.get(`/courses/${courseId}/user-review/`);
 };

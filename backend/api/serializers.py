@@ -4,7 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from api import models as api_models
 from userauths.models import Profile, User
-from core.models import Course
+from core.models import Course, CourseRating
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -124,15 +124,17 @@ class CourseSerializer(serializers.ModelSerializer):
     students = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="email"
     )
+    average_rating = serializers.SerializerMethodField()  # Add this field
 
     class Meta:
         model  = Course
         fields = (
             "id", "title", "description", "created_at",
             "teacher", "teacher_id",
-            "students",
+            "students", "average_rating",  # Include average_rating
         )
-
+    def get_average_rating(self, obj):
+        return obj.get_average_rating()  # Use the method from the Course model
 
 
 class CourseEnrollSerializer(serializers.ModelSerializer):
@@ -152,3 +154,11 @@ class StudentMiniSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "full_name", "email", "country"]
 
+
+class CourseRatingSerializer(serializers.ModelSerializer):
+    """
+    Serializer for CourseRating model.
+    """
+    class Meta:
+        model = CourseRating
+        fields = ['id', 'course', 'user', 'rating', 'created_at']
