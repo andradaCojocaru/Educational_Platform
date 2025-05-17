@@ -1,3 +1,4 @@
+// BaseHeader.js
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/UserContext";
@@ -9,8 +10,8 @@ const BaseHeader = () => {
   if (loading) return null;
 
   const handleLogout = () => {
-    logout(); // Clear context + localStorage
-    navigate("/login"); // Redirect to login page
+    logout(); // clear user context
+    navigate("/logout"); // navigate to logout route
   };
 
   return (
@@ -45,7 +46,7 @@ const BaseHeader = () => {
                 </Link>
               </li>
             )}
-            {userName && (
+            {userName && userRole && (
               <li className="nav-item">
                 <span className="nav-link">
                   Welcome, {userName} ({userRole})
@@ -53,7 +54,10 @@ const BaseHeader = () => {
               </li>
             )}
             <li className="nav-item">
-              <button onClick={handleLogout} className="btn btn-primary ms-3">
+              <button
+                className="btn btn-primary ms-3"
+                onClick={handleLogout}
+              >
                 Logout
               </button>
             </li>
