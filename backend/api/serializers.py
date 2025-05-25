@@ -149,6 +149,11 @@ class CourseEnrollSerializer(serializers.ModelSerializer):
             'students': {'required': True}
         }
 
+class CourseDescriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['description']  # Only include the 'description' field
+
 class StudentMiniSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

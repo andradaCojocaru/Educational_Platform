@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from userauths.models import User
 from core.models import Course, CourseRating
 from api.permissions import IsTeacherOrReadOnly
-from api.serializers import CourseRatingSerializer, TeacherMiniSerializer
+from api.serializers import CourseDescriptionSerializer, CourseRatingSerializer, TeacherMiniSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -155,13 +155,43 @@ def get_user_details(request):
         "role": user.role,
     })
 
+@swagger_auto_schema(
+    method="put",
+    operation_description="Update the description of a course. Only the 'description' field is allowed.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "description": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="The new description for the course.",
+                example="This is an updated course description."
+            ),
+        },
+        required=["description"],  # Mark 'description' as required
+    ),
+    responses={
+        200: "Course description updated successfully.",
+        400: "Invalid input.",
+        403: "Permission denied.",
+        404: "Course not found.",
+    },
+)
 
 @action(detail=True, methods=["put"], permission_classes=[IsTeacherOrReadOnly])
 def update_description(self, request, pk=None):
+    """
+    Update the description of a course. Only the 'description' field is allowed.
+    """
     course = self.get_object()
-    course.description = request.data.get("description", course.description)
-    course.save()
-    return Response({"message": "Course description updated successfully!"})
+
+    # Use the custom serializer for validation
+    serializer = CourseDescriptionSerializer(course, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+
+    # Save the updated description
+    serializer.save()
+
+    return Response({"message": "Course description updated successfully!"}, status=status.HTTP_200_OK)
 
 @swagger_auto_schema(
     method='post',

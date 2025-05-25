@@ -186,10 +186,22 @@ const Courses = () => {
 
   const handleUpdateCourse = async (courseId) => {
     try {
-      await updateCourse(courseId, { description: editDescription });
-      alert("Course description updated successfully!");
+      // Find the course being edited
+      const courseToUpdate = courses.find((course) => course.id === courseId);
+  
+      // Prepare the updated data
+      const updatedCourseData = {
+        title: courseToUpdate.title, // Keep the current title
+        description: editDescription, // Use the updated description
+        teacher_id: courseToUpdate.teacher?.id || "", // Keep the current teacher ID
+      };
+  
+      // Send the update request
+      await updateCourse(courseId, updatedCourseData);
+  
+      alert("Course updated successfully!");
       setEditingCourseId(null);
-      fetchCourses(user);
+      fetchCourses(user); // Refresh the courses list
     } catch (error) {
       console.error("Error updating course:", error);
       alert("Failed to update course.");
